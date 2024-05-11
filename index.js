@@ -34,6 +34,7 @@ async function run() {
     // Send a ping to confirm a successful connection
 
      const allJobCollection = client.db('JobsDB').collection('job');
+     const appliedJobsCollection = client.db('appliedDB').collection('applied')
 
     //  add jobs
     app.get('/jobs' , async(req, res) =>{
@@ -54,6 +55,26 @@ async function run() {
         const query = {_id : new ObjectId(id)}
         const job = await allJobCollection.findOne(query);
         res.send(job)
+    })
+
+    // applied jobs 
+     app.get('/appliedJobs', async(req , res )=>{
+       const cursor = appliedJobsCollection.find();
+       const result =await cursor.toArray();
+       res.send(result)
+     })
+
+     app.post('/appliedJobs', async (req ,res) =>{
+        const appliedJob = req.body;
+        const result = await appliedJobsCollection.insertOne(appliedJob);
+        res.send(result)
+     }) 
+ 
+     app.get('/appliedJobs/:email', async(req, res)=>{
+      // console.log(req.params.email)
+      const result = await appliedJobsCollection.find({
+        email: req.params.email}).toArray();
+      res.send(result)
     })
 
     await client.db("admin").command({ ping: 1 });
