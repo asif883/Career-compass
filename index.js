@@ -15,6 +15,7 @@ app.use(express.json())
 
 
 console.log(process.env.DB_USER)
+console.log(process.env.DB_PASS)
 
 const uri = "mongodb+srv://career-compass:tpXK3k01EiowvdAh@cluster0.osztyuf.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 
@@ -77,6 +78,50 @@ async function run() {
       res.send(result)
     })
 
+    // 
+
+    app.get('/myJobs/:email', async(req ,res)=>{
+
+      const result = await allJobCollection.find({email: req.params.email}).toArray();
+      res.send(result)
+    })
+    // delete 
+
+    app.delete('/myJobs/:id', async(req , res)=>{
+      const id = req.params.id;
+      const query = {_id : new ObjectId(id)}
+      const result =await allJobCollection.deleteOne(query);
+      res.send(result);
+
+    })
+
+    
+    // Update
+    app.put('/updateJob/:id',async (req, res)=>{
+      const id =req.params.id;
+      const filter= {_id: new ObjectId(id)};
+      const options ={upsert: true};
+      const updateJob = req.body
+      const update ={
+        $set:{
+          job_title:updateJob.job_title,
+          country_name:updateJob.country_name,
+          job_category:updateJob.job_category,
+          banner:updateJob.banner,
+          deadline:updateJob.deadline,
+          salary_range:updateJob.salary_range, 
+          number:updateJob.number,
+          total_visitors_per_year:updateJob.total_visitors_per_year,
+          email:updateJob.email,
+          name:updateJob.name,
+          job_description:updateJob.job_description
+
+        }
+      }
+      const result =await allJobCollection.updateOne(filter,update,options);
+      res.send(result)
+    })
+
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
@@ -92,5 +137,5 @@ app.get('/', (req ,res) =>{
 })
 
 app.listen(port ,()=>{
-    console.log( `server is running on the post ${port}`)
+    console.log( `server is running on the port ${port}`)
 })
